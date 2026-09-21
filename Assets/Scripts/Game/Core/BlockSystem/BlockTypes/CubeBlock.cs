@@ -76,18 +76,7 @@ public class CubeBlock : Block
                     }
                     else if (GoalPanel.Instance.CheckIsInGoals(cubeType))
                     {
-                        curBlock.SetSortingLayerName("UI");
-                        curBlock.SetSortingOrder(10);
-                        cubeLeavedGridEvent?.Invoke((int)gridIndex.x, (int)gridIndex.y);
-                        float arriveTime = 0.7f + (index * 0.15f);
-                        Vector3 targetPos = GoalPanel.Instance.GetGoalPos(cubeType);
-                        neigh.transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
-                        {
-                            AudioManager.Instance.PlayCubeCollectAudio();
-
-                            GoalPanel.Instance.DecereaseGoal(cubeType);
-                            Destroy(neigh);
-                        });
+                        curBlock.CollectToGoal(index * 0.15f);
                     }
                     else
                     {
@@ -194,6 +183,42 @@ public class CubeBlock : Block
             mySpriteRenderer = gameObject.GetComponentInChildren<SpriteRenderer>();
 
         mySpriteRenderer.sortingOrder = index;
+    }
+    public void CollectToGoal(float delay = 0f)
+    {
+        canTapped = false;
+        target = null;
+        DOTween.Kill(gameObject);
+        transform.DOKill();
+        SetSortingLayerName("UI");
+        SetSortingOrder(10);
+        cubeLeavedGridEvent?.Invoke((int)gridIndex.x, (int)gridIndex.y);
+
+        float arriveTime = 0.6f;
+        Vector3 targetPos = GoalPanel.Instance.GetGoalPos(cubeType);
+
+        if (delay > 0)
+        {
+            DOVirtual.DelayedCall(delay, () =>
+            {
+                if (this == null || gameObject == null) return;
+                transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
+                {
+                    AudioManager.Instance.PlayCubeCollectAudio();
+                    GoalPanel.Instance.DecereaseGoal(cubeType);
+                    Destroy(gameObject);
+                });
+            });
+        }
+        else
+        {
+            transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
+            {
+                AudioManager.Instance.PlayCubeCollectAudio();
+                GoalPanel.Instance.DecereaseGoal(cubeType);
+                Destroy(gameObject);
+            });
+        }
     }
 }
 

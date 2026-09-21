@@ -15,6 +15,12 @@ public class RocketBlock : Block
     public static event Action rocketStartedEvent;
     public static event Action rocketEndedEvent;
     public bool canTapped = true;
+
+    public static void EndAllRocketEvents()
+    {
+        rocketEndedEvent?.Invoke();
+    }
+
     public override void DoTappedActions()
     {
         if (canTapped)
@@ -33,61 +39,78 @@ public class RocketBlock : Block
             }
             
             rocketStartedEvent?.Invoke();
-
-            List<GameObject> firstList;
-            List<GameObject> secondList;
-            Vector3 targetPosFirst;
-            Vector3 targetPosSecond;
-            float moveDistance = 5f;
-            float arriveTime = 1f;
-            if (myDirection == RocketDirection.Horizontal)
-            {
-                firstList = NeighbourManager.Instance.FindLeftBlocks(gridIndex);
-                secondList = NeighbourManager.Instance.FindRightBlocks(gridIndex);
-                targetPosFirst = transform.position + new Vector3(-moveDistance, 0, 0);
-                targetPosSecond = transform.position + new Vector3(moveDistance, 0, 0);
-
-                Sprite tmpSprite = rocketRightSR.sprite;
-                rocketRightSR.sprite = rocketLeftSR.sprite;
-                rocketLeftSR.sprite = tmpSprite;
-            }
-            else
-            {
-                firstList = NeighbourManager.Instance.FindUpBlocks(gridIndex);
-                secondList = NeighbourManager.Instance.FindDownBlocks(gridIndex);
-                targetPosFirst = transform.position + new Vector3(0, moveDistance, 0);
-                targetPosSecond = transform.position + new Vector3(0, -moveDistance, 0);
-            }
-
-            
-            NeighbourManager.Instance.DoSingleObjAction(gridIndex);
-
             MovesPanel.Instance.Moves = MovesPanel.Instance.Moves - 1;
 
-            rightEffectObj.SetActive(true);
-            leftEffectObj.SetActive(true);
-
-            rocketRightSR.transform.DOMove(targetPosFirst, arriveTime).SetEase(Ease.Linear).OnComplete(() =>
-            {
-                Destroy(gameObject);
-                target = null;
-                FillManager.Instance.Fill();
-                rocketEndedEvent?.Invoke();
-
-            });
-            
-            for (int i = firstList.Count - 1; i >= 0; i--)
-            {
-                ExplodeHittedBlock(firstList[i], ((firstList.Count - 1) - i) * 0.12f);
-            }
-
-            rocketLeftSR.transform.DOMove(targetPosSecond, arriveTime).SetEase(Ease.Linear);
-            for (int i = 0; i < secondList.Count; i++)
-            {
-                ExplodeHittedBlock(secondList[i], i * 0.12f);
-            }
+            SpecialBlockManager.StartSpecial();
+            FireRocket();
         }
+    }
+
+    public void TriggerRocket(RocketDirection? forcedDirection = null)
+    {
+        if (!canTapped) return;
+        canTapped = false;
+
+        if (forcedDirection.HasValue)
+        {
+            myDirection = forcedDirection.Value;
+        }
+
+        SpecialBlockManager.StartSpecial();
+        FireRocket();
+    }
+
+    private void FireRocket()
+    {
+        GridManager gridManager = FindObjectOfType<GridManager>();
+        gridManager.allBlocks[(int)gridIndex.x].rows[(int)gridIndex.y] = null;
+        NeighbourManager.Instance.DoSingleObjAction(gridIndex);
+
+        List<GameObject> firstList;
+        List<GameObject> secondList;
+        Vector3 targetPosFirst;
+        Vector3 targetPosSecond;
+        float moveDistance = 5f;
+        float arriveTime = 0.8f;
+        if (myDirection == RocketDirection.Horizontal)
+        {
+            firstList = NeighbourManager.Instance.FindLeftBlocks(gridIndex);
+            secondList = NeighbourManager.Instance.FindRightBlocks(gridIndex);
+            targetPosFirst = transform.position + new Vector3(-moveDistance, 0, 0);
+            targetPosSecond = transform.position + new Vector3(moveDistance, 0, 0);
+
+            Sprite tmpSprite = rocketRightSR.sprite;
+            rocketRightSR.sprite = rocketLeftSR.sprite;
+            rocketLeftSR.sprite = tmpSprite;
+        }
+        else
+        {
+            firstList = NeighbourManager.Instance.FindUpBlocks(gridIndex);
+            secondList = NeighbourManager.Instance.FindDownBlocks(gridIndex);
+            targetPosFirst = transform.position + new Vector3(0, moveDistance, 0);
+            targetPosSecond = transform.position + new Vector3(0, -moveDistance, 0);
+        }
+
+        rightEffectObj.SetActive(true);
+        leftEffectObj.SetActive(true);
+
+        rocketRightSR.transform.DOMove(targetPosFirst, arriveTime).SetEase(Ease.Linear).OnComplete(() =>
+        {
+            Destroy(gameObject);
+            target = null;
+            SpecialBlockManager.EndSpecial();
+        });
         
+        for (int i = firstList.Count - 1; i >= 0; i--)
+        {
+            ExplodeHittedBlock(firstList[i], ((firstList.Count - 1) - i) * 0.08f);
+        }
+
+        rocketLeftSR.transform.DOMove(targetPosSecond, arriveTime).SetEase(Ease.Linear);
+        for (int i = 0; i < secondList.Count; i++)
+        {
+            ExplodeHittedBlock(secondList[i], i * 0.08f);
+        }
     }
 
     public override void SetupBlock()
@@ -177,72 +200,84 @@ public class RocketBlock : Block
     }
     public void PlayRocketAnim(RocketDirection direction)
     {
-        Vector3 targetPosFirst;
-        Vector3 targetPosSecond;
-        float moveDistance = 5f;
-        float arriveTime = 0.5f;
-        if (direction == RocketDirection.Horizontal)
-        {
-            targetPosFirst = transform.position + new Vector3(-moveDistance, 0, 0);
-            targetPosSecond = transform.position + new Vector3(moveDistance, 0, 0);
-
-            Sprite tmpSprite = rocketRightSR.sprite;
-            rocketRightSR.sprite = rocketLeftSR.sprite;
-            rocketLeftSR.sprite = tmpSprite;
-        }
-        else
-        {
-            targetPosFirst = transform.position + new Vector3(0, moveDistance, 0);
-            targetPosSecond = transform.position + new Vector3(0, -moveDistance, 0);
-        }
-
-        rightEffectObj.SetActive(true);
-        leftEffectObj.SetActive(true);
-
-        rocketRightSR.transform.DOMove(targetPosFirst, arriveTime).SetEase(Ease.Linear).OnComplete(()=>
-        {
-            Destroy(gameObject);
-        });
-        rocketLeftSR.transform.DOMove(targetPosSecond, arriveTime).SetEase(Ease.Linear);
-        
+        TriggerRocket(direction);
     }
-    private void ExplodeHittedBlock(GameObject blockObj,float destroyTime)
+    private void ExplodeHittedBlock(GameObject blockObj, float destroyTime)
     {
-        Block curBlock = blockObj.gameObject.GetComponent<Block>();
-        if (curBlock is CubeBlock)
-        {
-            curBlock.gameObject.GetComponent<CubeBlock>().canTapped = false;
-            CubeTypes cubeType = blockObj.GetComponent<CubeBlock>().cubeType;
-            AudioManager.Instance.PlayCubeExplosionAudio();
+        if (blockObj == null || blockObj == this.gameObject) return;
 
-            EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cubeType);
+        Block curBlock = blockObj.GetComponent<Block>();
+        if (curBlock == null) return;
+
+        GridManager gridManager = FindObjectOfType<GridManager>();
+        gridManager.allBlocks[(int)curBlock.gridIndex.x].rows[(int)curBlock.gridIndex.y] = null;
+
+        if (curBlock is CubeBlock cubeBlock)
+        {
+            cubeBlock.canTapped = false;
+            CubeTypes cubeType = cubeBlock.cubeType;
+
             if (GoalPanel.Instance.CheckIsInGoals(cubeType))
             {
-                GoalPanel.Instance.DecereaseGoal(cubeType);
+                cubeBlock.CollectToGoal(destroyTime);
+            }
+            else
+            {
+                AudioManager.Instance.PlayCubeExplosionAudio();
+                EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cubeType);
+                cubeBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                Destroy(blockObj, destroyTime);
             }
         }
-        else if (curBlock is DuckBlock)
+        else if (curBlock is BombBlock bombBlock)
         {
-           AudioManager.Instance.PlayDuckExplodeAudio();
-
+            bombBlock.TriggerExplosion();
         }
-        else if (curBlock is RocketBlock)
+        else if (curBlock is RocketBlock otherRocket)
         {
-            curBlock.gameObject.GetComponent<RocketBlock>().canTapped = false;
-            curBlock.gameObject.GetComponent<RocketBlock>().PlayRocketAnim(myDirection);
+            otherRocket.TriggerRocket();
         }
-        else if (curBlock is BalloonBlock)
+        else if (curBlock is ColorBombBlock colorBomb)
+        {
+            colorBomb.TriggerExplosion();
+        }
+        else if (curBlock is BalloonBlock balloonBlock)
         {
             AudioManager.Instance.PlayBalloonPopAudio();
             EffectsController.Instance.SpawnBalloonCrackEffect(blockObj.transform.position);
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Balloon))
+            {
+                GoalPanel.Instance.DecereaseGoal(BlockTypes.Balloon);
+            }
+            balloonBlock.target = null;
+            DOTween.Kill(blockObj);
+            blockObj.transform.DOKill();
+            Destroy(blockObj, destroyTime);
         }
-        if (GoalPanel.Instance.CheckIsInGoals(curBlock.blockType))
+        else if (curBlock is DuckBlock duckBlock)
         {
-            GoalPanel.Instance.DecereaseGoal(curBlock.blockType);
+            AudioManager.Instance.PlayDuckExplodeAudio();
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Duck))
+            {
+                duckBlock.SetSortingLayerName("UI");
+                duckBlock.SetSortingOrder(10);
+                float arriveTime = 0.6f;
+                Vector3 targetPos = GoalPanel.Instance.GetGoalPos(BlockTypes.Duck);
+                blockObj.transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
+                {
+                    GoalPanel.Instance.DecereaseGoal(BlockTypes.Duck);
+                    Destroy(blockObj);
+                });
+            }
+            else
+            {
+                duckBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                Destroy(blockObj, destroyTime);
+            }
         }
-        curBlock.target = null;
-        DOTween.Kill(blockObj);
-        blockObj.transform.DOKill();  
-        Destroy(blockObj, destroyTime);
     }
 }

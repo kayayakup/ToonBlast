@@ -44,7 +44,15 @@ public class InputManager : MonoBehaviour
                 GameObject hittedObj = hittedCollider.gameObject;
                 if (hittedObj.CompareTag("Block"))
                 {
-                    hittedObj.gameObject.GetComponent<Block>().DoTappedActions();
+                    Block block = hittedObj.gameObject.GetComponent<Block>();
+                    if (block != null)
+                    {
+                        if (BoosterManager.Instance != null && BoosterManager.Instance.HandleGridClick(block))
+                        {
+                            return;
+                        }
+                        block.DoTappedActions();
+                    }
                 }
             }
         } 

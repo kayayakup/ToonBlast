@@ -22,25 +22,40 @@ public class FallManager : MonoBehaviour
     }
     public void Fall()
     {
-        for (int i = 0; i < gridManager.changingColumns.Count; i++)
+        for (int col = 0; col < gridManager.myGrid.GridSizeX; col++)
         {
-            var item = gridManager.changingColumns.ElementAt(i);
-            var itemKey = item.Key;
-            var itemValue = item.Value;
+            int rowLength = gridManager.allBlocks[col].rows.Length;
+            int emptyCount = 0;
 
-            Vector3 startPos = gridManager.allPosObjs[itemKey].rows[0].transform.position +
-                new Vector3(0, 2, 0);
-            for (int j = 0; j < itemValue; j++)
+            for (int y = 0; y < rowLength; y++)
+            {
+                if (gridManager.allBlocks[col].rows[y] == null ||
+                    (gridManager.allBlocks[col].rows[y] != null && gridManager.allBlocks[col].rows[y].GetComponent<Block>().target == null))
+                {
+                    emptyCount++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            if (emptyCount == 0) continue;
+
+            Vector3 startPos = gridManager.allPosObjs[col].rows[0].transform.position + new Vector3(0, 2, 0);
+
+            for (int j = 0; j < emptyCount; j++)
             {
                 Vector3 spawnPos = startPos + new Vector3(0, j * 1f, 0);
-                int yIndex = (itemValue - 1) - j;
-                Transform targetTransform = gridManager.allPosObjs[itemKey].rows[yIndex].transform;
+                int yIndex = (emptyCount - 1) - j;
+                Transform targetTransform = gridManager.allPosObjs[col].rows[yIndex].transform;
 
-                GameObject spawnedBlockObj = AddRandomBlockToGrid(itemKey, yIndex, spawnPos, targetTransform);
-                float arriveTime = Mathf.Clamp(Vector3.Distance(targetTransform.position, spawnPos)*0.2f,0.5f,0.8f);
+                GameObject spawnedBlockObj = AddRandomBlockToGrid(col, yIndex, spawnPos, targetTransform);
+                float arriveTime = Mathf.Clamp(Vector3.Distance(targetTransform.position, spawnPos) * 0.2f, 0.5f, 0.8f);
                 spawnedBlockObj.GetComponent<Block>().MoveToTarget(arriveTime);
             }
         }
+
         gridManager.changingColumns = new Dictionary<int, int>();
         
         DOVirtual.DelayedCall(0.1f, () => {
@@ -56,8 +71,8 @@ public class FallManager : MonoBehaviour
         BlockTypes curBlockType = BlockTypes.Cube;
         CubeTypes curCubeType = (CubeTypes)UnityEngine.Random.Range(0, System.Enum.GetValues(typeof(CubeTypes)).Length);
 
-        var myBlockType = BlockFactory.GetBlock(curBlockType);
-        Block currentBlock = spawnedBlockObj.AddComponent(myBlockType.GetType()) as Block;
+        System.Type blockType = BlockFactory.GetBlockType(curBlockType);
+        Block currentBlock = spawnedBlockObj.AddComponent(blockType) as Block;
         spawnedBlockObj.GetComponent<CubeBlock>().cubeType = curCubeType;
 
         currentBlock.gridIndex = new Vector2(x, y);

@@ -146,12 +146,11 @@ public class GridManager : MonoBehaviour
         BlockTypes curBlockType = blockTypes[xIndex, yIndex];
         CubeTypes curCubeType = cubeTypes[xIndex, yIndex];
 
-        //BlockFactory.Reset();
-        var myBlockType = BlockFactory.GetBlock(curBlockType);
-        Block currentBlock = blockObj.AddComponent(myBlockType.GetType()) as Block;
-        if (myBlockType is CubeBlock)
+        System.Type blockCompType = BlockFactory.GetBlockType(curBlockType);
+        Block currentBlock = blockObj.AddComponent(blockCompType) as Block;
+        if (currentBlock is CubeBlock cubeBlock)
         {
-            blockObj.GetComponent<CubeBlock>().cubeType = curCubeType;
+            cubeBlock.cubeType = curCubeType;
         }
 
         if (myGoal != null)

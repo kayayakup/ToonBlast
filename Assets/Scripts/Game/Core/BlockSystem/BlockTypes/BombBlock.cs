@@ -14,6 +14,11 @@ public class BombBlock : Block
     public static event Action bombStartedEvent;
     public static event Action bombEndedEvent;
 
+    public static void EndAllBombEvents()
+    {
+        bombEndedEvent?.Invoke();
+    }
+
     public override void DoTappedActions()
     {
         if (canTapped)
@@ -32,55 +37,71 @@ public class BombBlock : Block
             }
 
             bombStartedEvent?.Invoke();
-
             MovesPanel.Instance.Moves = MovesPanel.Instance.Moves - 1;
 
-            // Find all blocks in 3x3 area
-            List<GameObject> explodeList = new List<GameObject>();
-            GridManager gridManager = FindObjectOfType<GridManager>();
-            int startX = (int)Mathf.Max(0, gridIndex.x - 1);
-            int endX = (int)Mathf.Min(gridManager.myGrid.GridSizeX - 1, gridIndex.x + 1);
-            int startY = (int)Mathf.Max(0, gridIndex.y - 1);
-            int endY = (int)Mathf.Min(gridManager.myGrid.GridSizeY - 1, gridIndex.y + 1);
-
-            for (int x = startX; x <= endX; x++)
-            {
-                for (int y = startY; y <= endY; y++)
-                {
-                    GameObject blockObj = gridManager.allBlocks[x].rows[y];
-                    if (blockObj != null)
-                    {
-                        explodeList.Add(blockObj);
-                    }
-                }
-            }
-            
-            NeighbourManager.Instance.DoSingleObjAction(gridIndex);
-            
-            // Expand changing columns for all exploded blocks
-            for (int i = 0; i < explodeList.Count; i++)
-            {
-                Block curBlock = explodeList[i].GetComponent<Block>();
-                if (curBlock != null)
-                {
-                    gridManager.AddNewChangingColumn((int)curBlock.gridIndex.x);
-                }
-            }
-
-            // Explode them
-            for (int i = 0; i < explodeList.Count; i++)
-            {
-                ExplodeHittedBlock(explodeList[i], 0.1f);
-            }
-
-            Destroy(gameObject, 0.15f);
-            target = null;
-            
-            DOVirtual.DelayedCall(0.15f, () => {
-                FillManager.Instance.Fill();
-                bombEndedEvent?.Invoke();
-            });
+            SpecialBlockManager.StartSpecial();
+            ExplodeArea();
         }
+    }
+
+    public void TriggerExplosion()
+    {
+        if (!canTapped) return;
+        canTapped = false;
+
+        SpecialBlockManager.StartSpecial();
+        ExplodeArea();
+    }
+
+    private void ExplodeArea()
+    {
+        GridManager gridManager = FindObjectOfType<GridManager>();
+        gridManager.allBlocks[(int)gridIndex.x].rows[(int)gridIndex.y] = null;
+        NeighbourManager.Instance.DoSingleObjAction(gridIndex);
+
+        // Find all blocks in 3x3 area
+        List<GameObject> explodeList = new List<GameObject>();
+        int startX = (int)Mathf.Max(0, gridIndex.x - 1);
+        int endX = (int)Mathf.Min(gridManager.myGrid.GridSizeX - 1, gridIndex.x + 1);
+        int startY = (int)Mathf.Max(0, gridIndex.y - 1);
+        int endY = (int)Mathf.Min(gridManager.myGrid.GridSizeY - 1, gridIndex.y + 1);
+
+        for (int x = startX; x <= endX; x++)
+        {
+            for (int y = startY; y <= endY; y++)
+            {
+                GameObject blockObj = gridManager.allBlocks[x].rows[y];
+                if (blockObj != null && blockObj != this.gameObject)
+                {
+                    explodeList.Add(blockObj);
+                }
+            }
+        }
+        
+        // Expand changing columns for all exploded blocks
+        for (int i = 0; i < explodeList.Count; i++)
+        {
+            Block curBlock = explodeList[i].GetComponent<Block>();
+            if (curBlock != null)
+            {
+                gridManager.AddNewChangingColumn((int)curBlock.gridIndex.x);
+            }
+        }
+
+        // Explode them
+        for (int i = 0; i < explodeList.Count; i++)
+        {
+            ExplodeHittedBlock(explodeList[i], 0.1f);
+        }
+
+        target = null;
+        DOTween.Kill(gameObject);
+        transform.DOKill();
+        Destroy(gameObject, 0.15f);
+        
+        DOVirtual.DelayedCall(0.2f, () => {
+            SpecialBlockManager.EndSpecial();
+        });
     }
 
     public override void SetupBlock()
@@ -135,41 +156,75 @@ public class BombBlock : Block
         Block curBlock = blockObj.GetComponent<Block>();
         if (curBlock == null) return;
 
-        if (curBlock is CubeBlock)
-        {
-            curBlock.gameObject.GetComponent<CubeBlock>().canTapped = false;
-            CubeTypes cType = blockObj.GetComponent<CubeBlock>().cubeType;
-            AudioManager.Instance.PlayCubeExplosionAudio();
+        GridManager gridManager = FindObjectOfType<GridManager>();
+        gridManager.allBlocks[(int)curBlock.gridIndex.x].rows[(int)curBlock.gridIndex.y] = null;
 
-            EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cType);
+        if (curBlock is CubeBlock cubeBlock)
+        {
+            cubeBlock.canTapped = false;
+            CubeTypes cType = cubeBlock.cubeType;
+
             if (GoalPanel.Instance.CheckIsInGoals(cType))
             {
-                GoalPanel.Instance.DecereaseGoal(cType);
+                cubeBlock.CollectToGoal(destroyTime);
+            }
+            else
+            {
+                AudioManager.Instance.PlayCubeExplosionAudio();
+                EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cType);
+                cubeBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                Destroy(blockObj, destroyTime);
             }
         }
-        else if (curBlock is DuckBlock)
+        else if (curBlock is BombBlock otherBomb)
         {
-            AudioManager.Instance.PlayDuckExplodeAudio();
+            otherBomb.TriggerExplosion();
         }
-        else if (curBlock is RocketBlock)
+        else if (curBlock is RocketBlock rocketBlock)
         {
-            curBlock.gameObject.GetComponent<RocketBlock>().canTapped = false;
-            curBlock.gameObject.GetComponent<RocketBlock>().PlayRocketAnim(RocketDirection.Vertical);
+            rocketBlock.TriggerRocket();
         }
-        else if (curBlock is BalloonBlock)
+        else if (curBlock is ColorBombBlock colorBomb)
+        {
+            colorBomb.TriggerExplosion();
+        }
+        else if (curBlock is BalloonBlock balloonBlock)
         {
             AudioManager.Instance.PlayBalloonPopAudio();
             EffectsController.Instance.SpawnBalloonCrackEffect(blockObj.transform.position);
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Balloon))
+            {
+                GoalPanel.Instance.DecereaseGoal(BlockTypes.Balloon);
+            }
+            balloonBlock.target = null;
+            DOTween.Kill(blockObj);
+            blockObj.transform.DOKill();
+            Destroy(blockObj, destroyTime);
         }
-        
-        if (GoalPanel.Instance.CheckIsInGoals(curBlock.blockType))
+        else if (curBlock is DuckBlock duckBlock)
         {
-            GoalPanel.Instance.DecereaseGoal(curBlock.blockType);
+            AudioManager.Instance.PlayDuckExplodeAudio();
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Duck))
+            {
+                duckBlock.SetSortingLayerName("UI");
+                duckBlock.SetSortingOrder(10);
+                float arriveTime = 0.6f;
+                Vector3 targetPos = GoalPanel.Instance.GetGoalPos(BlockTypes.Duck);
+                blockObj.transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
+                {
+                    GoalPanel.Instance.DecereaseGoal(BlockTypes.Duck);
+                    Destroy(blockObj);
+                });
+            }
+            else
+            {
+                duckBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                Destroy(blockObj, destroyTime);
+            }
         }
-        
-        curBlock.target = null;
-        DOTween.Kill(blockObj);
-        blockObj.transform.DOKill();
-        Destroy(blockObj, destroyTime);
     }
 }

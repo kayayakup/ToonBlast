@@ -22,37 +22,31 @@ public class FillManager : MonoBehaviour
     }
     public void Fill()
     {
-
-        for (int i = 0; i < gridManager.changingColumns.Count; i++)
+        for (int col = 0; col < gridManager.myGrid.GridSizeX; col++)
         {
-            var item = gridManager.changingColumns.ElementAt(i);
-            var itemKey = item.Key;
-            var itemValue = item.Value;
-
-            int rowLength = gridManager.allBlocks[itemKey].rows.Length;
+            int rowLength = gridManager.allBlocks[col].rows.Length;
             for (int j = rowLength - 1; j >= 0; j--)
             {
-                if (gridManager.allBlocks[itemKey].rows[j] == null || (gridManager.allBlocks[itemKey].rows[j]
-                    && gridManager.allBlocks[itemKey].rows[j].GetComponent<Block>().target == null))
+                if (gridManager.allBlocks[col].rows[j] == null || (gridManager.allBlocks[col].rows[j]
+                    && gridManager.allBlocks[col].rows[j].GetComponent<Block>().target == null))
                 {
                     for (int k = j; k >= 0; k--)
                     {
-                        if (gridManager.allBlocks[itemKey].rows[k]
-                            && gridManager.allBlocks[itemKey].rows[k].GetComponent<Block>().target != null)
+                        if (gridManager.allBlocks[col].rows[k]
+                            && gridManager.allBlocks[col].rows[k].GetComponent<Block>().target != null)
                         {
-                            GameObject newTargetObj = gridManager.allPosObjs[itemKey].rows[j].gameObject;
-                            Block curBlock = gridManager.allBlocks[itemKey].rows[k].gameObject.GetComponent<Block>();
+                            GameObject newTargetObj = gridManager.allPosObjs[col].rows[j].gameObject;
+                            Block curBlock = gridManager.allBlocks[col].rows[k].gameObject.GetComponent<Block>();
                             curBlock.target = newTargetObj.transform;
-                            curBlock.gridIndex = new Vector2(itemKey, j);
+                            curBlock.gridIndex = new Vector2(col, j);
 
-                            gridManager.allBlocks[itemKey].rows[j] = gridManager.allBlocks[itemKey].rows[k];
-                            gridManager.allBlocks[itemKey].rows[k] = null;
+                            gridManager.allBlocks[col].rows[j] = gridManager.allBlocks[col].rows[k];
+                            gridManager.allBlocks[col].rows[k] = null;
                             curBlock.UpdateSortingOrder();
                             curBlock.MoveToTarget(0.5f);
                             break;
                         }
                     }
-
                 }
             }
         }
@@ -69,8 +63,8 @@ public class FillManager : MonoBehaviour
 
         BlockTypes curBlockType = blockType;
 
-        var myBlockType = BlockFactory.GetBlock(curBlockType);
-        Block currentBlock = spawnedBlock.AddComponent(myBlockType.GetType()) as Block;
+        System.Type blockCompType = BlockFactory.GetBlockType(curBlockType);
+        Block currentBlock = spawnedBlock.AddComponent(blockCompType) as Block;
 
         currentBlock.gridIndex = gridIndex;
         currentBlock.target = gridManager.allPosObjs[x].rows[y].transform;

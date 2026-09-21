@@ -324,31 +324,66 @@ public static class ComboManager
         GridManager gridManager = UnityEngine.Object.FindObjectOfType<GridManager>();
         gridManager.allBlocks[(int)curBlock.gridIndex.x].rows[(int)curBlock.gridIndex.y] = null;
 
-        if (curBlock is CubeBlock)
+        if (curBlock is CubeBlock cubeBlock)
         {
-            curBlock.gameObject.GetComponent<CubeBlock>().canTapped = false;
-            CubeTypes cType = blockObj.GetComponent<CubeBlock>().cubeType;
-            AudioManager.Instance.PlayCubeExplosionAudio();
-            EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cType);
+            cubeBlock.canTapped = false;
+            CubeTypes cType = cubeBlock.cubeType;
+            if (GoalPanel.Instance.CheckIsInGoals(cType))
+            {
+                cubeBlock.CollectToGoal(destroyTime);
+            }
+            else
+            {
+                AudioManager.Instance.PlayCubeExplosionAudio();
+                EffectsController.Instance.SpawnCubeCrackEffect(blockObj.transform.position, cType);
+                curBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                UnityEngine.Object.Destroy(blockObj, destroyTime);
+            }
         }
-        else if (curBlock is DuckBlock)
+        else if (curBlock is DuckBlock duckBlock)
         {
             AudioManager.Instance.PlayDuckExplodeAudio();
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Duck))
+            {
+                duckBlock.SetSortingLayerName("UI");
+                duckBlock.SetSortingOrder(10);
+                float arriveTime = 0.6f;
+                Vector3 targetPos = GoalPanel.Instance.GetGoalPos(BlockTypes.Duck);
+                blockObj.transform.DOMove(targetPos, arriveTime).SetEase(Ease.InOutBack).OnComplete(() =>
+                {
+                    GoalPanel.Instance.DecereaseGoal(BlockTypes.Duck);
+                    UnityEngine.Object.Destroy(blockObj);
+                });
+            }
+            else
+            {
+                curBlock.target = null;
+                DOTween.Kill(blockObj);
+                blockObj.transform.DOKill();
+                UnityEngine.Object.Destroy(blockObj, destroyTime);
+            }
         }
-        else if (curBlock is BalloonBlock)
+        else if (curBlock is BalloonBlock balloonBlock)
         {
             AudioManager.Instance.PlayBalloonPopAudio();
             EffectsController.Instance.SpawnBalloonCrackEffect(blockObj.transform.position);
+            if (GoalPanel.Instance.CheckIsInGoals(BlockTypes.Balloon))
+            {
+                GoalPanel.Instance.DecereaseGoal(BlockTypes.Balloon);
+            }
+            curBlock.target = null;
+            DOTween.Kill(blockObj);
+            blockObj.transform.DOKill();
+            UnityEngine.Object.Destroy(blockObj, destroyTime);
         }
-        
-        if (GoalPanel.Instance.CheckIsInGoals(curBlock.blockType))
+        else
         {
-            GoalPanel.Instance.DecereaseGoal(curBlock.blockType);
+            curBlock.target = null;
+            DOTween.Kill(blockObj);
+            blockObj.transform.DOKill();
+            UnityEngine.Object.Destroy(blockObj, destroyTime);
         }
-        
-        curBlock.target = null;
-        DOTween.Kill(blockObj);
-        blockObj.transform.DOKill();
-        UnityEngine.Object.Destroy(blockObj, destroyTime);
     }
 }

@@ -37,6 +37,12 @@ public class LevelManager : MonoBehaviour
     }
     private void LoadLevel()
     {
+        SpecialBlockManager.Reset();
+        if (BoosterManager.Instance == null)
+        {
+            GameObject boosterObj = new GameObject("BoosterManager");
+            boosterObj.AddComponent<BoosterManager>();
+        }
         currentLevelIndex = PlayerPrefs.GetInt("Level", 0);
         
         // Generate levels if we have run out
