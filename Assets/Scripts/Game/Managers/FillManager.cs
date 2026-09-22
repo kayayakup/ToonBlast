@@ -1,6 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public class FillManager : MonoBehaviour
@@ -50,7 +47,7 @@ public class FillManager : MonoBehaviour
                 }
             }
         }
-        
+
         FallManager.Instance.Fall();
     }
     public void FillOnlyOneBlock(BlockTypes blockType, CubeTypes cubeType, Vector2 gridIndex)
@@ -68,13 +65,13 @@ public class FillManager : MonoBehaviour
 
         currentBlock.gridIndex = gridIndex;
         currentBlock.target = gridManager.allPosObjs[x].rows[y].transform;
-        
+
         // Pass cubeType to special blocks that need it
         if (currentBlock is ColorBombBlock colorBombBlock)
         {
             colorBombBlock.cubeType = cubeType;
         }
-        
+
         Goal myGoal = gridManager.myGoal;
         if (myGoal != null)
         {

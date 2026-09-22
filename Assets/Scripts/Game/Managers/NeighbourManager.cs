@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 public class NeighbourManager : MonoBehaviour
 {
     [SerializeField] private GridManager gridManager;
@@ -220,7 +218,7 @@ public class NeighbourManager : MonoBehaviour
         {
             Vector2 curr = toVisit[0];
             toVisit.RemoveAt(0);
-            
+
             if (visited.Contains(curr)) continue;
             visited.Add(curr);
             count++;

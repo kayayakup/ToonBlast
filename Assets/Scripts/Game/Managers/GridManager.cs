@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
 //[ExecuteInEditMode]
@@ -190,7 +188,7 @@ public class GridManager : MonoBehaviour
                 changingColumns.Remove(columnIndex);
             }
         }
-      
+
     }
     private void ClearCell(int x, int y)
     {

@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
-using System;
 
 public static class ComboManager
 {
@@ -13,7 +11,7 @@ public static class ComboManager
         bool isRocket1 = first.blockType == BlockTypes.Rocket;
         bool isBomb1 = first.blockType == BlockTypes.Bomb;
         bool isColor1 = first.blockType == BlockTypes.ColorBomb;
-        
+
         bool isRocket2 = second.blockType == BlockTypes.Rocket;
         bool isBomb2 = second.blockType == BlockTypes.Bomb;
         bool isColor2 = second.blockType == BlockTypes.ColorBomb;
@@ -76,8 +74,8 @@ public static class ComboManager
                 }
             }
         }
-        
-        foreach(var obj in toExplode)
+
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -87,7 +85,8 @@ public static class ComboManager
             }
         }
 
-        DOVirtual.DelayedCall(delay, () => {
+        DOVirtual.DelayedCall(delay, () =>
+        {
             FillManager.Instance.Fill();
         });
     }
@@ -99,7 +98,7 @@ public static class ComboManager
         ExplodeSingleBlock(b1.gameObject, 0.1f);
         gridManager.AddNewChangingColumn((int)b2.gridIndex.x);
         ExplodeSingleBlock(b2.gameObject, 0.1f);
-        
+
         HashSet<GameObject> toExplode = new HashSet<GameObject>();
         for (int x = 0; x < gridManager.myGrid.GridSizeX; x++)
         {
@@ -111,8 +110,8 @@ public static class ComboManager
                 }
             }
         }
-        
-        foreach(var obj in toExplode)
+
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -121,7 +120,8 @@ public static class ComboManager
                 ExplodeSingleBlock(b.gameObject, 0.1f);
             }
         }
-        DOVirtual.DelayedCall(0.5f, () => {
+        DOVirtual.DelayedCall(0.5f, () =>
+        {
             FillManager.Instance.Fill();
         });
     }
@@ -158,7 +158,7 @@ public static class ComboManager
                 toExplode.Add(gridManager.allBlocks[(int)center.x].rows[y]);
         }
 
-        foreach(var obj in toExplode)
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -167,7 +167,8 @@ public static class ComboManager
                 ExplodeSingleBlock(b.gameObject, 0.1f);
             }
         }
-        DOVirtual.DelayedCall(0.3f, () => {
+        DOVirtual.DelayedCall(0.3f, () =>
+        {
             FillManager.Instance.Fill();
         });
     }
@@ -200,7 +201,7 @@ public static class ComboManager
             }
         }
 
-        foreach(var obj in toExplode)
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -209,7 +210,8 @@ public static class ComboManager
                 ExplodeSingleBlock(b.gameObject, 0.1f);
             }
         }
-        DOVirtual.DelayedCall(0.4f, () => {
+        DOVirtual.DelayedCall(0.4f, () =>
+        {
             FillManager.Instance.Fill();
         });
     }
@@ -246,8 +248,8 @@ public static class ComboManager
                 }
             }
         }
-        
-        foreach(var obj in toExplode)
+
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -256,7 +258,8 @@ public static class ComboManager
                 ExplodeSingleBlock(b.gameObject, 0.1f);
             }
         }
-        DOVirtual.DelayedCall(0.5f, () => {
+        DOVirtual.DelayedCall(0.5f, () =>
+        {
             FillManager.Instance.Fill();
         });
     }
@@ -289,19 +292,19 @@ public static class ComboManager
                 }
             }
         }
-        
-        foreach(int c in affectedCols)
+
+        foreach (int c in affectedCols)
         {
-            for(int y=0; y<gridManager.myGrid.GridSizeY; y++)
+            for (int y = 0; y < gridManager.myGrid.GridSizeY; y++)
                 if (gridManager.allBlocks[c].rows[y] != null) toExplode.Add(gridManager.allBlocks[c].rows[y]);
         }
-        foreach(int r in affectedRows)
+        foreach (int r in affectedRows)
         {
-            for(int x=0; x<gridManager.myGrid.GridSizeX; x++)
+            for (int x = 0; x < gridManager.myGrid.GridSizeX; x++)
                 if (gridManager.allBlocks[x].rows[r] != null) toExplode.Add(gridManager.allBlocks[x].rows[r]);
         }
-        
-        foreach(var obj in toExplode)
+
+        foreach (var obj in toExplode)
         {
             Block b = obj.GetComponent<Block>();
             if (b != null)
@@ -310,7 +313,8 @@ public static class ComboManager
                 ExplodeSingleBlock(b.gameObject, 0.1f);
             }
         }
-        DOVirtual.DelayedCall(0.5f, () => {
+        DOVirtual.DelayedCall(0.5f, () =>
+        {
             FillManager.Instance.Fill();
         });
     }

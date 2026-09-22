@@ -1,7 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Linq;
 using DG.Tweening;
 public class FallManager : MonoBehaviour
 {
@@ -57,8 +55,9 @@ public class FallManager : MonoBehaviour
         }
 
         gridManager.changingColumns = new Dictionary<int, int>();
-        
-        DOVirtual.DelayedCall(0.1f, () => {
+
+        DOVirtual.DelayedCall(0.1f, () =>
+        {
             if (NeighbourManager.Instance != null)
                 NeighbourManager.Instance.UpdateAllCubeVisuals();
         });

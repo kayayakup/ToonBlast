@@ -1,5 +1,4 @@
 using UnityEngine;
-using System.Collections.Generic;
 
 public class LevelGenerator : MonoBehaviour
 {
@@ -25,7 +24,7 @@ public class LevelGenerator : MonoBehaviour
         // Difficulty scaling
         int gridWidth = Mathf.Clamp(5 + levelIndex / 10, 5, 9);
         int gridHeight = Mathf.Clamp(5 + levelIndex / 10, 5, 9);
-        
+
         newLevel.moves = Mathf.Clamp(20 + levelIndex / 2, 20, 45);
 
         // Grid setup

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -44,7 +43,7 @@ public class LevelManager : MonoBehaviour
             boosterObj.AddComponent<BoosterManager>();
         }
         currentLevelIndex = PlayerPrefs.GetInt("Level", 0);
-        
+
         // Generate levels if we have run out
         if (allLevels == null) allLevels = new List<Level>();
         while (currentLevelIndex >= allLevels.Count)
@@ -64,7 +63,7 @@ public class LevelManager : MonoBehaviour
                 }
             }
         }
-        
+
         currentLevelData = allLevels[currentLevelIndex];
         gridManager.dataLevel = currentLevelData;
         gridManager.LoadGridData();
@@ -72,8 +71,9 @@ public class LevelManager : MonoBehaviour
         gridManager.SetGridCornerSize();
         isLevelActive = true;
         levelLoadedEvent?.Invoke();
-        
-        DG.Tweening.DOVirtual.DelayedCall(0.1f, () => {
+
+        DG.Tweening.DOVirtual.DelayedCall(0.1f, () =>
+        {
             if (NeighbourManager.Instance != null)
                 NeighbourManager.Instance.UpdateAllCubeVisuals();
         });
@@ -85,7 +85,7 @@ public class LevelManager : MonoBehaviour
             isLevelActive = false;
             levelFailedEvent?.Invoke();
         }
-        
+
     }
     public void LevelSuccesed()
     {

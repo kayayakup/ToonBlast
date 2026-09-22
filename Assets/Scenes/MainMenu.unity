@@ -119,6 +119,71 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
+--- !u!1 &474061401
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 474061402}
+  - component: {fileID: 474061403}
+  m_Layer: 0
+  m_Name: GameObject
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &474061402
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474061401}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &474061403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 474061401}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c49ca08636981a441a99d91375a86d58, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuManager
+  backgroundSprites:
+  - {fileID: 21300000, guid: 981a8694f32f8464781016bad1998107, type: 3}
+  - {fileID: 21300000, guid: 1750b2c712f424c4ebedaa0dcc24ce35, type: 3}
+  - {fileID: 21300000, guid: 6b1cfa2c4f39379489e8ba61fd8fdda2, type: 3}
+  - {fileID: 21300000, guid: 88279f68ed709004da791863e895a651, type: 3}
+  - {fileID: 21300000, guid: f589d8f6047e1ce49abd9829272fae20, type: 3}
+  - {fileID: 21300000, guid: e74d84e929aa5da4fb4957f1bfd93a83, type: 3}
+  - {fileID: 21300000, guid: 347cfddd80340b14f8476a538e057121, type: 3}
+  - {fileID: 21300000, guid: 01e291d890e383a4fac9d8a113390ba4, type: 3}
+  - {fileID: 21300000, guid: c575902976313ce409d3930f52e94eb1, type: 3}
+  - {fileID: 21300000, guid: 572ca5cb16030174fa9d88f4cf08205c, type: 3}
+  - {fileID: 21300000, guid: 73c94d42ec255d5498d59d7134520068, type: 3}
+  - {fileID: 21300000, guid: c3580718e78333446aa87fc6232288ad, type: 3}
+  - {fileID: 21300000, guid: c42b1429bcc9bce4aa42772beb90030d, type: 3}
+  - {fileID: 21300000, guid: f54c9b40196e15f42b55b4921881749a, type: 3}
+  - {fileID: 21300000, guid: 14db2dec4f2d8f247a1f9d8178f9c6d2, type: 3}
+  - {fileID: 21300000, guid: e229cff1176218c4eb4c67726baeec3c, type: 3}
+  - {fileID: 21300000, guid: 4c8c580f122e0574ab4ff7895c94fc11, type: 3}
+  slideDuration: 4
+  transitionDuration: 1.5
+  gameSceneIndex: 1
 --- !u!1 &480084722
 GameObject:
   m_ObjectHideFlags: 0
@@ -216,3 +281,4 @@ SceneRoots:
   m_ObjectHideFlags: 0
   m_Roots:
   - {fileID: 480084725}
+  - {fileID: 474061402}

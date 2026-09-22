@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class InputManager : MonoBehaviour
@@ -12,7 +10,7 @@ public class InputManager : MonoBehaviour
         {
 
 #if UNITY_EDITOR
-        GetEditorInputs();
+            GetEditorInputs();
 #else
 		GetMobileTouches();
 #endif
@@ -36,7 +34,7 @@ public class InputManager : MonoBehaviour
     }
     private void DetectHittedObject(Vector3 touchedPos)
     {
-        if (MovesPanel.Instance.Moves>0)
+        if (MovesPanel.Instance.Moves > 0)
         {
             BoxCollider2D hittedCollider = Physics2D.OverlapPoint(mainCam.ScreenToWorldPoint(touchedPos)) as BoxCollider2D;
             if (hittedCollider)
@@ -55,14 +53,14 @@ public class InputManager : MonoBehaviour
                     }
                 }
             }
-        } 
+        }
     }
     private void EnableClicking()
     {
         if (LevelManager.Instance.isLevelActive)
         {
             canClick = true;
-        }    
+        }
     }
     private void DisableClicking()
     {
